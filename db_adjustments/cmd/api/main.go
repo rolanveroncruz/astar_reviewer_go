@@ -60,7 +60,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for question := range questions {
-
+	for i, question := range questions {
+		fmt.Print(formatQuestion(i, question))
+		if i >= 10 {
+			break
+		}
 	}
+}
+
+func formatQuestion(i int, question repli_questions.RepliQuestionDTO) string {
+	choices := "   choices:("
+	for j, ch := range question.Choices {
+		choices += fmt.Sprintf(" %d, %s: %s ", j, ch.Letter, ch.Answer)
+	}
+	choices += ")"
+	answer := question.CorrectChoiceAnswer
+	return fmt.Sprintf("%d: %s %s %s\n", i, question.Question, choices, *answer)
 }
