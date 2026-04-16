@@ -17,10 +17,11 @@ import (
 )
 
 type AIResponse struct {
-	IsComplete       bool   `json:"is_complete"`
-	IsClear          bool   `json:"is_clear"`
-	IsUnambiguous    bool   `json:"is_unambiguous"`
-	ImprovedQuestion string `json:"improved_question"`
+	IsComplete        bool   `json:"is_complete"`
+	IsClear           bool   `json:"is_clear"`
+	IsUnambiguous     bool   `json:"is_unambiguous"`
+	ImprovedQuestion  string `json:"improved_question"`
+	AnswerExplanation string `json:"answer_explanation"`
 }
 
 func main() {
@@ -69,13 +70,17 @@ func main() {
 		if pQErr != nil {
 			fmt.Printf("Error processing question %d: %s\n", i, pQErr)
 		}
-		fmt.Println(fmt.Sprintf("Question %d: %s\n is_complete: %v\n is_unambiguous:%v\n is_clear:%v\n %s\n\n\n",
+		fmt.Println(fmt.Sprintf("Question %d: %s\n\n Answer: %s\n\n is_complete: %v\n is_unambiguous:%v\n "+
+			"is_clear:%v\n %s\n\n Explanation:%s\n",
 			i,
 			question.Question,
+			*question.CorrectChoiceLetter+":"+*question.CorrectChoiceAnswer,
 			resp.IsComplete,
 			resp.IsUnambiguous,
 			resp.IsClear,
-			resp.ImprovedQuestion))
+			resp.ImprovedQuestion,
+			resp.AnswerExplanation,
+		))
 		fmt.Println("----------------------------------------")
 
 		isAcceptable := resp.IsComplete && resp.IsUnambiguous && resp.IsClear
@@ -83,6 +88,7 @@ func main() {
 			ID:                     question.ID,
 			IsAnAcceptableQuestion: isAcceptable,
 			RefinedQuestion:        sql.NullString{String: resp.ImprovedQuestion, Valid: true},
+			AnsExplanation:         sql.NullString{String: resp.AnswerExplanation, Valid: true},
 		})
 		if err != nil {
 			log.Println(fmt.Sprintf("UpdateRepliQuestionAcceptance() error: %s", err))
@@ -95,15 +101,16 @@ func formatQuestion(question repli_questions.RepliQuestionDTO) string {
 	for _, ch := range question.Choices {
 		choices += fmt.Sprintf("%s: %s\n", ch.Letter, ch.Answer)
 	}
-	answer := "Answer is:" + *question.CorrectChoiceLetter + ".: " + *question.CorrectChoiceAnswer
-	return fmt.Sprintf("%s\n\n %s\n\n %s\n\n\n\n", question.Question, choices, answer)
+	answer := "The correct answer is:" + *question.CorrectChoiceLetter + ".: " + *question.CorrectChoiceAnswer
+	return fmt.Sprintf("%s\n\n\n %s\n\n\n %s\n\n\n\n", question.Question, choices, answer)
 }
 
 func processQuestion(ctx context.Context, client *genai.Client, question repli_questions.RepliQuestionDTO) (*AIResponse, error) {
 	intro := "We're administering a sample exam of multiple choice questions. Questions were scraped  from a" +
 		"pdf file, and could have some errors. I will give you a question and your task is to say if" +
 		"it is a complete, clear, and unambiguous question. If it fails in one of the criteria, provide a better " +
-		"phrasing of the question without changing the multiple choice answers, nor the actual answer."
+		"phrasing of the question without changing the multiple choice answers, nor the actual answer." +
+		"Also give an explanation of why the correct answer is the best or only correct answer."
 	prompt := fmt.Sprintf("%s\n The question is: %s", intro, formatQuestion(question))
 	model := "gemini-3.1-pro-preview"
 
@@ -116,12 +123,13 @@ func processQuestion(ctx context.Context, client *genai.Client, question repli_q
 			ResponseSchema: &genai.Schema{
 				Type: "object",
 				Properties: map[string]*genai.Schema{
-					"is_complete":       {Type: "boolean"},
-					"is_clear":          {Type: "boolean"},
-					"is_unambiguous":    {Type: "boolean"},
-					"improved_question": {Type: "string"},
+					"is_complete":        {Type: "boolean"},
+					"is_clear":           {Type: "boolean"},
+					"is_unambiguous":     {Type: "boolean"},
+					"improved_question":  {Type: "string"},
+					"answer_explanation": {Type: "string"},
 				},
-				Required: []string{},
+				Required: []string{"is_complete", "is_clear", "is_unambiguous", "improved_question", "answer_explanation"},
 			},
 		},
 	)

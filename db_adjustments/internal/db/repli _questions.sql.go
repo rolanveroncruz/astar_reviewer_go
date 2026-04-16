@@ -89,7 +89,8 @@ const updateRepliQuestionAcceptance = `-- name: UpdateRepliQuestionAcceptance :e
 UPDATE repli_questions
 SET
     is_an_acceptable_question = $2,
-    refined_question = $3
+    refined_question = $3,
+    ans_explanation = $4
 WHERE id = $1
 `
 
@@ -97,9 +98,15 @@ type UpdateRepliQuestionAcceptanceParams struct {
 	ID                     int32          `json:"id"`
 	IsAnAcceptableQuestion bool           `json:"is_an_acceptable_question"`
 	RefinedQuestion        sql.NullString `json:"refined_question"`
+	AnsExplanation         sql.NullString `json:"ans_explanation"`
 }
 
 func (q *Queries) UpdateRepliQuestionAcceptance(ctx context.Context, arg UpdateRepliQuestionAcceptanceParams) error {
-	_, err := q.db.ExecContext(ctx, updateRepliQuestionAcceptance, arg.ID, arg.IsAnAcceptableQuestion, arg.RefinedQuestion)
+	_, err := q.db.ExecContext(ctx, updateRepliQuestionAcceptance,
+		arg.ID,
+		arg.IsAnAcceptableQuestion,
+		arg.RefinedQuestion,
+		arg.AnsExplanation,
+	)
 	return err
 }

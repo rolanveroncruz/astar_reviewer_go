@@ -26,5 +26,6 @@ ORDER BY rq.id, rc.letter;
 UPDATE repli_questions
 SET
     is_an_acceptable_question = $2,
-    refined_question = $3
+    refined_question = $3,
+    ans_explanation = $4
 WHERE id = $1;

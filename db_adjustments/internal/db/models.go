@@ -59,6 +59,7 @@ type RepliQuestion struct {
 	CorrectChoiceID        sql.NullInt32  `json:"correct_choice_id"`
 	IsAnAcceptableQuestion bool           `json:"is_an_acceptable_question"`
 	RefinedQuestion        sql.NullString `json:"refined_question"`
+	AnsExplanation         sql.NullString `json:"ans_explanation"`
 }
 
 type Source struct {
