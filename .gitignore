@@ -22,7 +22,6 @@ vendor/
 
 # Environment variables
 .env
-db_adjustments/.env
 
 # Database backups
 *.dump
