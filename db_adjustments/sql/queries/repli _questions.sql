@@ -5,7 +5,7 @@ SELECT
     rq.level_of_difficulty,
     rq.question,
     rq.correct_choice_id,
-    rq.is_a_complete_question,
+    rq.is_an_acceptable_question,
     rq.refined_question,
 
     rc.id AS choice_id,
@@ -20,3 +20,11 @@ FROM repli_questions rq
          LEFT JOIN repli_choices cc
                    ON cc.id = rq.correct_choice_id
 ORDER BY rq.id, rc.letter;
+
+
+-- name: UpdateRepliQuestionAcceptance :exec
+UPDATE repli_questions
+SET
+    is_an_acceptable_question = $2,
+    refined_question = $3
+WHERE id = $1;

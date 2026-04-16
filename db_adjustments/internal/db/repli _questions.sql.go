@@ -17,7 +17,7 @@ SELECT
     rq.level_of_difficulty,
     rq.question,
     rq.correct_choice_id,
-    rq.is_a_complete_question,
+    rq.is_an_acceptable_question,
     rq.refined_question,
 
     rc.id AS choice_id,
@@ -35,18 +35,18 @@ ORDER BY rq.id, rc.letter
 `
 
 type ListRepliQuestionsWithChoicesRow struct {
-	QuestionID          int32          `json:"question_id"`
-	FromQuestionID      int32          `json:"from_question_id"`
-	LevelOfDifficulty   int32          `json:"level_of_difficulty"`
-	Question            string         `json:"question"`
-	CorrectChoiceID     sql.NullInt32  `json:"correct_choice_id"`
-	IsACompleteQuestion bool           `json:"is_a_complete_question"`
-	RefinedQuestion     sql.NullString `json:"refined_question"`
-	ChoiceID            int32          `json:"choice_id"`
-	ChoiceLetter        string         `json:"choice_letter"`
-	ChoiceAnswer        string         `json:"choice_answer"`
-	CorrectChoiceLetter sql.NullString `json:"correct_choice_letter"`
-	CorrectChoiceAnswer sql.NullString `json:"correct_choice_answer"`
+	QuestionID             int32          `json:"question_id"`
+	FromQuestionID         int32          `json:"from_question_id"`
+	LevelOfDifficulty      int32          `json:"level_of_difficulty"`
+	Question               string         `json:"question"`
+	CorrectChoiceID        sql.NullInt32  `json:"correct_choice_id"`
+	IsAnAcceptableQuestion bool           `json:"is_an_acceptable_question"`
+	RefinedQuestion        sql.NullString `json:"refined_question"`
+	ChoiceID               int32          `json:"choice_id"`
+	ChoiceLetter           string         `json:"choice_letter"`
+	ChoiceAnswer           string         `json:"choice_answer"`
+	CorrectChoiceLetter    sql.NullString `json:"correct_choice_letter"`
+	CorrectChoiceAnswer    sql.NullString `json:"correct_choice_answer"`
 }
 
 func (q *Queries) ListRepliQuestionsWithChoices(ctx context.Context) ([]ListRepliQuestionsWithChoicesRow, error) {
@@ -64,7 +64,7 @@ func (q *Queries) ListRepliQuestionsWithChoices(ctx context.Context) ([]ListRepl
 			&i.LevelOfDifficulty,
 			&i.Question,
 			&i.CorrectChoiceID,
-			&i.IsACompleteQuestion,
+			&i.IsAnAcceptableQuestion,
 			&i.RefinedQuestion,
 			&i.ChoiceID,
 			&i.ChoiceLetter,
@@ -83,4 +83,23 @@ func (q *Queries) ListRepliQuestionsWithChoices(ctx context.Context) ([]ListRepl
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRepliQuestionAcceptance = `-- name: UpdateRepliQuestionAcceptance :exec
+UPDATE repli_questions
+SET
+    is_an_acceptable_question = $2,
+    refined_question = $3
+WHERE id = $1
+`
+
+type UpdateRepliQuestionAcceptanceParams struct {
+	ID                     int32          `json:"id"`
+	IsAnAcceptableQuestion bool           `json:"is_an_acceptable_question"`
+	RefinedQuestion        sql.NullString `json:"refined_question"`
+}
+
+func (q *Queries) UpdateRepliQuestionAcceptance(ctx context.Context, arg UpdateRepliQuestionAcceptanceParams) error {
+	_, err := q.db.ExecContext(ctx, updateRepliQuestionAcceptance, arg.ID, arg.IsAnAcceptableQuestion, arg.RefinedQuestion)
+	return err
 }

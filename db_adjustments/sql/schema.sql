@@ -234,7 +234,7 @@ CREATE TABLE public.repli_questions (
     level_of_difficulty integer NOT NULL,
     question text NOT NULL,
     correct_choice_id integer,
-    is_a_complete_question boolean DEFAULT false NOT NULL,
+    is_an_acceptable_question boolean DEFAULT false NOT NULL,
     refined_question text
 );
 

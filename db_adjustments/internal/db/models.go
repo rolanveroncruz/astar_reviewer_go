@@ -52,13 +52,13 @@ type RepliChoice struct {
 }
 
 type RepliQuestion struct {
-	ID                  int32          `json:"id"`
-	FromQuestionID      int32          `json:"from_question_id"`
-	LevelOfDifficulty   int32          `json:"level_of_difficulty"`
-	Question            string         `json:"question"`
-	CorrectChoiceID     sql.NullInt32  `json:"correct_choice_id"`
-	IsACompleteQuestion bool           `json:"is_a_complete_question"`
-	RefinedQuestion     sql.NullString `json:"refined_question"`
+	ID                     int32          `json:"id"`
+	FromQuestionID         int32          `json:"from_question_id"`
+	LevelOfDifficulty      int32          `json:"level_of_difficulty"`
+	Question               string         `json:"question"`
+	CorrectChoiceID        sql.NullInt32  `json:"correct_choice_id"`
+	IsAnAcceptableQuestion bool           `json:"is_an_acceptable_question"`
+	RefinedQuestion        sql.NullString `json:"refined_question"`
 }
 
 type Source struct {

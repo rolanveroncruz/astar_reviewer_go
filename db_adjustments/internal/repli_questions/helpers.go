@@ -13,16 +13,16 @@ type RepliChoiceDTO struct {
 }
 
 type RepliQuestionDTO struct {
-	ID                  int32            `json:"id"`
-	FromQuestionID      int32            `json:"from_question_id"`
-	LevelOfDifficulty   int32            `json:"level_of_difficulty"`
-	Question            string           `json:"question"`
-	CorrectChoiceID     *int32           `json:"correct_choice_id,omitempty"`
-	CorrectChoiceLetter *string          `json:"correct_choice_letter,omitempty"`
-	CorrectChoiceAnswer *string          `json:"correct_choice_answer,omitempty"`
-	IsACompleteQuestion bool             `json:"is_a_complete_question"`
-	RefinedQuestion     *string          `json:"refined_question,omitempty"`
-	Choices             []RepliChoiceDTO `json:"choices"`
+	ID                     int32            `json:"id"`
+	FromQuestionID         int32            `json:"from_question_id"`
+	LevelOfDifficulty      int32            `json:"level_of_difficulty"`
+	Question               string           `json:"question"`
+	CorrectChoiceID        *int32           `json:"correct_choice_id,omitempty"`
+	CorrectChoiceLetter    *string          `json:"correct_choice_letter,omitempty"`
+	CorrectChoiceAnswer    *string          `json:"correct_choice_answer,omitempty"`
+	IsAnAcceptableQuestion bool             `json:"is_an_acceptable_question"`
+	RefinedQuestion        *string          `json:"refined_question,omitempty"`
+	Choices                []RepliChoiceDTO `json:"choices"`
 }
 
 func GetAllRepliQuestionsTransformed(ctx context.Context, q *db.Queries) ([]RepliQuestionDTO, error) {
@@ -38,12 +38,12 @@ func GetAllRepliQuestionsTransformed(ctx context.Context, q *db.Queries) ([]Repl
 		idx, exists := indexByQuestionID[row.QuestionID]
 		if !exists {
 			item := RepliQuestionDTO{
-				ID:                  row.QuestionID,
-				FromQuestionID:      row.FromQuestionID,
-				LevelOfDifficulty:   row.LevelOfDifficulty,
-				Question:            row.Question,
-				IsACompleteQuestion: row.IsACompleteQuestion,
-				Choices:             make([]RepliChoiceDTO, 0),
+				ID:                     row.QuestionID,
+				FromQuestionID:         row.FromQuestionID,
+				LevelOfDifficulty:      row.LevelOfDifficulty,
+				Question:               row.Question,
+				IsAnAcceptableQuestion: row.IsAnAcceptableQuestion,
+				Choices:                make([]RepliChoiceDTO, 0),
 			}
 
 			if row.CorrectChoiceID.Valid {
